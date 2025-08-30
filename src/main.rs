@@ -28,6 +28,7 @@ pub fn main() {
     let mut canvas = window.into_canvas().build().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
+        // Input listener - Vehicle spawning
         for event in event_pump.poll_iter() {
             match input_listener(event) {
                 Ok(()) => {}
