@@ -43,7 +43,6 @@ pub fn input_listener(
                     1,
                     BOTTOM_SPAWN,
                     BOTTOM_DESTINATION,
-                    VEHICLE_SPEED,
                     VehicleDirection::North,
                 ));
             }

@@ -10,6 +10,7 @@ pub enum VehicleDirection {
     West,
 }
 
+#[derive(Debug)]
 pub struct Vehicle {
     pub id: i32,
     pub position: (f32, f32),
