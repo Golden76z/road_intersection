@@ -16,6 +16,8 @@ use render::sdl_renderer;
 use simulation::{controller, road, traffic_light, vehicle};
 
 pub fn main() {
+    let config = Config::new();
+
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
