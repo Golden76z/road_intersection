@@ -1,5 +1,3 @@
-// extern crate sdl2;
-
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::{event::Event, rect};
@@ -10,14 +8,11 @@ mod input;
 mod render;
 mod simulation;
 
-use config::*;
 use input::input_listener;
 use render::sdl_renderer;
 use simulation::{controller, road, traffic_light, vehicle};
 
 pub fn main() {
-    let config = Config::new();
-
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 

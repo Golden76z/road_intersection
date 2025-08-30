@@ -1,5 +1,7 @@
 use crate::simulation::Vehicle;
+use std::collections::VecDeque;
 
+// Constants for the display settings
 pub const CANVA_WIDTH: u32 = 1000;
 pub const CANVA_HEIGHT: u32 = 1000;
 pub const VEHICLE_WIDTH: u32 = CANVA_WIDTH / 20;
@@ -7,57 +9,31 @@ pub const VEHICLE_HEIGHT: u32 = CANVA_HEIGHT / 20;
 pub const TRAFFIC_LIGHT_WIDTH: u32 = CANVA_WIDTH / 20;
 pub const TRAFFIC_LIGHT_HEIGHT: u32 = CANVA_HEIGHT / 20;
 pub const SAFE_DISTANCE: u32 = VEHICLE_WIDTH;
-pub const VEHICLE_PER_LANE: u32 = (CANVA_WIDTH - VEHICLE_WIDTH) / (VEHICLE_WIDTH + SAFE_DISTANCE);
+pub const VEHICLE_PER_LANE: u32 =
+    (CANVA_WIDTH / 2 - VEHICLE_WIDTH) / (VEHICLE_WIDTH + SAFE_DISTANCE);
+pub const VEHICLE_SPEED: u16 = 200;
 
-pub const COLORS: [(&str, (u8, u8, u8)); 3] = [
-    ("LEFT", (220, 220, 30)),
-    ("UP", (30, 220, 220)),
-    ("RIGHT", (220, 30, 220)),
-];
-
-pub struct Config {
-    pub canva_width: u32,
-    pub canva_height: u32,
-
-    pub vehicle_width: u32,
-    pub vehicle_height: u32,
-
-    pub traffic_light_width: u32,
-    pub traffic_light_height: u32,
-
-    // road_width: u32,
-    // road_height: u32,
-    pub top_left: Vec<Vehicle>,
-    pub top_right: Vec<Vehicle>,
-    pub bottom_left: Vec<Vehicle>,
-    pub bottom_right: Vec<Vehicle>,
-
-    pub intersection: Vec<Vehicle>,
-    // colors: [(str, u8)],
+// Colors depending on the direction
+pub enum Direction {
+    Left,
+    Up,
+    Right,
 }
-
-impl Config {
-    pub fn new() -> Self {
-        Config {
-            canva_width: CANVA_WIDTH,
-            canva_height: CANVA_HEIGHT,
-
-            vehicle_width: VEHICLE_WIDTH,
-            vehicle_height: VEHICLE_HEIGHT,
-
-            traffic_light_width: TRAFFIC_LIGHT_WIDTH,
-            traffic_light_height: TRAFFIC_LIGHT_HEIGHT,
-
-            // Vec storing all the spawning vehicle lanes
-            top_left: Vec::with_capacity(VEHICLE_PER_LANE as usize),
-            top_right: Vec::with_capacity(VEHICLE_PER_LANE as usize),
-            bottom_left: Vec::with_capacity(VEHICLE_PER_LANE as usize),
-            bottom_right: Vec::with_capacity(VEHICLE_PER_LANE as usize),
-
-            // Intersection vec, storing transitioning vehicles
-            intersection: Vec::with_capacity(VEHICLE_PER_LANE as usize),
-            // Color struct storing all 3 colors representing the directions
-            // Colors: COLORS,
+impl Direction {
+    pub fn color(&self) -> (u8, u8, u8) {
+        match self {
+            Direction::Left => (220, 220, 30),
+            Direction::Up => (30, 220, 220),
+            Direction::Right => (220, 30, 220),
         }
     }
 }
+
+// Vec storing all the spawning vehicle lanes
+pub const TOP_LEFT: VecDeque<Vehicle> = VecDeque::new();
+pub const TOP_RIGHT: VecDeque<Vehicle> = VecDeque::new();
+pub const BOTTOM_LEFT: VecDeque<Vehicle> = VecDeque::new();
+pub const BOTTOM_RIGHT: VecDeque<Vehicle> = VecDeque::new();
+
+// Intersection vec, storing transitioning vehicles
+pub const INTERSECTION: VecDeque<Vehicle> = VecDeque::new();
