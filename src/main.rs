@@ -1,24 +1,16 @@
-// extern crate sdl2;
-
-use std::collections::HashMap;
-use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::{event::Event, rect};
 use std::time::Duration;
-use sdl2::rect::Rect;
 
 mod config;
 mod input;
 mod render;
 mod simulation;
-mod config;
 
 use input::input_listener;
 use render::sdl_renderer;
 use simulation::{controller, road, traffic_light, vehicle};
-use crate::config::*;
-use crate::render::Renderer;
 
 use crate::config::{TrafficLanes, VEHICLE_HEIGHT, VEHICLE_WIDTH};
 
@@ -34,7 +26,7 @@ pub fn main() {
         .build()
         .unwrap();
 
-    let mut renderer = Renderer::new(window).unwrap();
+    let mut canvas = window.into_canvas().build().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
         canvas.clear();
@@ -48,8 +40,19 @@ pub fn main() {
                 }
             }
         }
-        // The rest of the game loop goes here...
-        renderer.draw().unwrap();
+
+        for item in lanes.bottom.lock().unwrap().iter_mut() {
+            println!("Item: {:?}", item);
+            item.update_position();
+            item.render(&mut canvas, VEHICLE_WIDTH, VEHICLE_HEIGHT);
+        }
+        // Rest of the game loop
+        canvas.set_draw_color(Color::RGB(0, 0, 0));
+
+        // canvas.draw_rect(rect::Rect::new(500, 500, 50, 50));
+        // canvas.draw_line(rect::Point::new(500, 0), rect::Point::new(500, 1000));
+
+        canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
