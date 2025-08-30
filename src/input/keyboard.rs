@@ -1,9 +1,26 @@
+use std::thread::spawn;
+
 use rand::prelude::*;
 
-use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::{event::Event, render::Canvas};
 
-pub fn input_listener(event: Event) -> Result<(), String> {
+// use crate::config::{
+//     BOTTOM, BOTTOM_DESTINATION, BOTTOM_SPAWN, CANVA_WIDTH, VEHICLE_SPEED, VEHICLE_WIDTH,
+// };
+use crate::{
+    config::{
+        BOTTOM_DESTINATION, BOTTOM_SPAWN, TrafficLanes, VEHICLE_HEIGHT, VEHICLE_SPEED,
+        VEHICLE_WIDTH,
+    },
+    simulation::{Vehicle, VehicleDirection, spawn_vehicle},
+};
+
+pub fn input_listener(
+    event: Event,
+    lanes: &TrafficLanes,
+    canvas: &mut Canvas<sdl2::video::Window>,
+) -> Result<(), String> {
     // Input listening
     match event {
         Event::Quit { .. }
@@ -12,18 +29,32 @@ pub fn input_listener(event: Event) -> Result<(), String> {
             ..
         } => return Err("Program end".to_string()),
 
-        // Listening for the UP keypress
-        Event::KeyDown {
-            keycode: Some(Keycode::Up),
-            ..
-        } => {
-            println!("Up arrow pressed");
-            Ok(())
-        }
-
         // Listening for the DOWN keypress
         Event::KeyDown {
             keycode: Some(Keycode::Down),
+            ..
+        } => {
+            println!("Up arrow pressed");
+
+            // Lock the bottom lane for checking and potentially adding
+            let mut bottom_lane = lanes.bottom.lock().unwrap();
+            if spawn_vehicle(&*bottom_lane) {
+                bottom_lane.push_back(Vehicle::new(
+                    1,
+                    BOTTOM_SPAWN,
+                    BOTTOM_DESTINATION,
+                    VEHICLE_SPEED,
+                    VehicleDirection::North,
+                ));
+            }
+            let length = bottom_lane.len() - 1;
+            bottom_lane[length].accelerate();
+            Ok(())
+        }
+
+        // Listening for the UP keypress
+        Event::KeyDown {
+            keycode: Some(Keycode::Up),
             ..
         } => {
             println!("Down arrow pressed");

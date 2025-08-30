@@ -10,6 +10,7 @@ pub enum VehicleDirection {
     West,
 }
 
+#[derive(Debug)]
 pub struct Vehicle {
     pub id: i32,
     pub position: (f32, f32),
@@ -26,13 +27,15 @@ impl<'a> Vehicle {
         speed: u16,
         direction: VehicleDirection,
     ) -> Self {
-        Vehicle {
+        let mut new_vehicle = Vehicle {
             id,
             position,
             target,
             speed,
             direction,
-        }
+        };
+        new_vehicle.accelerate();
+        new_vehicle
     }
 
     // delta_time = 60 fps
