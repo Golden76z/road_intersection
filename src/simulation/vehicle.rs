@@ -2,7 +2,7 @@ use sdl2;
 
 use crate::config::{VEHICLE_HEIGHT, VEHICLE_SPEED, VEHICLE_WIDTH};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VehicleDirection {
     North,
     South,
@@ -16,6 +16,7 @@ pub struct Vehicle {
     pub target: (f32, f32),
     pub speed: u16,
     pub direction: VehicleDirection,
+    pub shape: sdl2::rect::Rect,
 }
 
 impl<'a> Vehicle {
@@ -31,6 +32,20 @@ impl<'a> Vehicle {
             target,
             speed: VEHICLE_SPEED,
             direction,
+            shape: match direction {
+                VehicleDirection::North | VehicleDirection::South => sdl2::rect::Rect::new(
+                    position.0 as i32 - (VEHICLE_WIDTH / 2) as i32,
+                    position.1 as i32 - (VEHICLE_HEIGHT / 2) as i32,
+                    VEHICLE_WIDTH,
+                    VEHICLE_HEIGHT,
+                ),
+                VehicleDirection::East | VehicleDirection::West => sdl2::rect::Rect::new(
+                    position.0 as i32 - (VEHICLE_HEIGHT / 2) as i32,
+                    position.1 as i32 - (VEHICLE_WIDTH / 2) as i32,
+                    VEHICLE_HEIGHT,
+                    VEHICLE_WIDTH,
+                ),
+            },
         }
     }
 
@@ -38,22 +53,8 @@ impl<'a> Vehicle {
         &self,
         canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
     ) {
-        let rect = match self.direction {
-            VehicleDirection::North | VehicleDirection::South => sdl2::rect::Rect::new(
-                self.position.0 as i32 - (VEHICLE_WIDTH / 2) as i32,
-                self.position.1 as i32 - (VEHICLE_HEIGHT / 2) as i32,
-                VEHICLE_WIDTH,
-                VEHICLE_HEIGHT,
-            ),
-            VehicleDirection::East | VehicleDirection::West => sdl2::rect::Rect::new(
-                self.position.0 as i32 - (VEHICLE_HEIGHT / 2) as i32,
-                self.position.1 as i32 - (VEHICLE_WIDTH / 2) as i32,
-                VEHICLE_HEIGHT,
-                VEHICLE_WIDTH,
-            ),
-        };
         canvas.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 255));
-        let _ = canvas.fill_rect(rect);
+        let _ = canvas.fill_rect(self.shape);
     }
 
     // delta_time = 60 fps
@@ -69,8 +70,20 @@ impl<'a> Vehicle {
                 let normalized_x = direction.0 / distance;
                 let normalized_y = direction.1 / distance;
 
-                self.position.0 += normalized_x * self.speed as f32 * 1.0 / 60.0;
-                self.position.1 += normalized_y * self.speed as f32 * 1.0 / 60.0;
+                let movement_distance = self.speed as f32 * 1.0 / 60.0;
+                
+                // Vérifier si on va dépasser la cible
+                if distance <= movement_distance {
+                    // On arrive à la cible, s'arrêter là
+                    self.position = self.target;
+                } else {
+                    // Mouvement normal
+                    self.position.0 += normalized_x * movement_distance;
+                    self.position.1 += normalized_y * movement_distance;
+                }
+                
+                // IMPORTANT: Mettre à jour le shape après avoir changé la position
+                self.update_shape();
             }
         }
 
@@ -92,6 +105,23 @@ impl<'a> Vehicle {
         } else if self.target.1 < self.position.1 {
             self.direction = VehicleDirection::North;
         }
+    }
+
+    fn update_shape(&mut self) {
+        self.shape = match self.direction {
+            VehicleDirection::North | VehicleDirection::South => sdl2::rect::Rect::new(
+                self.position.0 as i32 - (VEHICLE_WIDTH / 2) as i32,
+                self.position.1 as i32 - (VEHICLE_HEIGHT / 2) as i32,
+                VEHICLE_WIDTH,
+                VEHICLE_HEIGHT,
+            ),
+            VehicleDirection::East | VehicleDirection::West => sdl2::rect::Rect::new(
+                self.position.0 as i32 - (VEHICLE_HEIGHT / 2) as i32,
+                self.position.1 as i32 - (VEHICLE_WIDTH / 2) as i32,
+                VEHICLE_HEIGHT,
+                VEHICLE_WIDTH,
+            ),
+        };
     }
 
     pub fn brake(&mut self) {
