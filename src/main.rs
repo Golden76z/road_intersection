@@ -8,23 +8,25 @@ use std::time::Duration;
 mod input;
 mod render;
 mod simulation;
+mod config;
 
 use input::keyboard;
 use render::sdl_renderer;
 use simulation::{controller, road, traffic_light, vehicle};
+use crate::config::*;
+use crate::render::Renderer;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("road_intersection", 1200, 800)
+        .window("road_intersection", GRID_WIDTH * CASE_SIZE, GRID_HEIGHT * CASE_SIZE)
         .position_centered()
         .build()
         .unwrap();
 
-    let mut canvas = window.into_canvas().build().unwrap();
-
+    let mut renderer = Renderer::new(window).unwrap();
     // canvas.set_draw_color(Color::RGB(0, 0, 0));
     // canvas.clear();
     // canvas.present();
@@ -46,7 +48,7 @@ pub fn main() {
         }
         // The rest of the game loop goes here...
 
-        canvas.present();
+        renderer.draw().unwrap();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
