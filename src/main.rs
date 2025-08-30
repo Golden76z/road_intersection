@@ -43,8 +43,7 @@ pub fn main() {
 
         for item in lanes.bottom.lock().unwrap().iter_mut() {
             println!("Item: {:?}", item);
-            item.update_position();
-            item.render(&mut canvas, VEHICLE_WIDTH, VEHICLE_HEIGHT);
+            item.r#move(&mut canvas);
         }
         // Rest of the game loop
         canvas.set_draw_color(Color::RGB(0, 0, 0));
