@@ -14,8 +14,8 @@ impl Renderer {
         let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
         let lights :HashMap<String,TrafficLight> = HashMap::from([
             (String::from("North"),TrafficLight::new(Rect::new((GRID_WIDTH_PIXELS/2 - 2 * CASE_SIZE -1).cast_signed(), (GRID_HEIGHT_PIXELS/2 - 2 * CASE_SIZE - 1).cast_signed(),CASE_SIZE, CASE_SIZE ))),
-            (String::from("West"),TrafficLight::new(Rect::new((GRID_WIDTH_PIXELS/2 + CASE_SIZE +1).cast_signed(), (GRID_HEIGHT_PIXELS/2 - 2 * CASE_SIZE -1).cast_signed(),CASE_SIZE, CASE_SIZE ))),
-            (String::from("East"),TrafficLight::new(Rect::new((GRID_WIDTH_PIXELS/2 - 2 * CASE_SIZE -1).cast_signed(), (GRID_HEIGHT_PIXELS/2 + CASE_SIZE +1).cast_signed(),CASE_SIZE, CASE_SIZE ))),
+            (String::from("East"),TrafficLight::new(Rect::new((GRID_WIDTH_PIXELS/2 + CASE_SIZE +1).cast_signed(), (GRID_HEIGHT_PIXELS/2 - 2 * CASE_SIZE -1).cast_signed(),CASE_SIZE, CASE_SIZE ))),
+            (String::from("West"),TrafficLight::new(Rect::new((GRID_WIDTH_PIXELS/2 - 2 * CASE_SIZE -1).cast_signed(), (GRID_HEIGHT_PIXELS/2 + CASE_SIZE +1).cast_signed(),CASE_SIZE, CASE_SIZE ))),
             (String::from("South"),TrafficLight::new(Rect::new((GRID_WIDTH_PIXELS/2 + CASE_SIZE +1).cast_signed(), (GRID_HEIGHT_PIXELS/2 + CASE_SIZE +1).cast_signed(),CASE_SIZE, CASE_SIZE )))
         
         ]);
