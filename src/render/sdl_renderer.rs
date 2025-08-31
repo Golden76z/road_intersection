@@ -1,16 +1,17 @@
 use crate::config::*;
-use crate::simulation::TrafficLight;
+use crate::simulation::{TrafficLight};
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 use sdl2::video::Window;
 use std::cmp::{max, min};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub struct Renderer {
     pub canvas: WindowCanvas,
     pub lights: HashMap<String, TrafficLight>,
     pub lanes: TrafficLanes,
+    pub waiting: HashMap<String, HashSet<i32>>
 }
 
 impl Renderer {
@@ -56,18 +57,41 @@ impl Renderer {
         ]);
 
         let lanes = TrafficLanes::new();
-
+        let waiting : HashMap<String,HashSet<i32>> = HashMap::from([(String::from("South"),HashSet::new()),(String::from("North"),HashSet::new()),(String::from("East"),HashSet::new()),(String::from("West"),HashSet::new())]);
         Ok(Renderer {
             canvas,
             lights,
             lanes,
+            waiting
         })
     }
     //Lights
-    pub fn change_state(&mut self, s: &str) {
+    pub fn change_state(&mut self, s: &str,state: Option<bool>) {
         if let Some(light) = self.lights.get_mut(s) {
-            light.change_state();
+            light.change_state(state)
         }
+    }
+
+    fn update_lights(&mut self) {
+        let mut max : (&String,usize) = (&String::new(),0);
+        for (lane,vehicles) in self.waiting.iter_mut() {
+            if vehicles.len() == 0 {
+                if let Some(light) = self.lights.get_mut(lane) {
+                    light.change_state(Some(false))
+                }
+            } else {
+                if max.1 < vehicles.len() {
+                    if let Some(light) = self.lights.get_mut(max.0) {
+                        light.change_state(Some(false))
+                    }
+                    max = (lane, vehicles.len())
+                }
+            }
+        }
+        if let Some(light) = self.lights.get_mut(max.0) {
+            light.change_state(Some(true))
+        }
+
     }
 
     //Only for straight line
@@ -180,27 +204,28 @@ impl Renderer {
     pub fn draw_vehicles(&mut self) {
         // Drawing the up lane vehicles
         for item in self.lanes.up.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas, &self.lights);
+            item.r#move(&mut self.canvas, &self.lights, &mut self.waiting);
         }
 
         // Drawing the bottom lane vehicles
         for item in self.lanes.bottom.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas, &self.lights);
+            item.r#move(&mut self.canvas, &self.lights, &mut self.waiting);
         }
 
         // Drawing the left lane vehicles
         for item in self.lanes.left.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas, &self.lights);
+            item.r#move(&mut self.canvas, &self.lights, &mut self.waiting);
         }
 
         // Drawing the right lane vehicles
         for item in self.lanes.right.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas, &self.lights);
+            item.r#move(&mut self.canvas, &self.lights, &mut self.waiting);
         }
     }
 
     pub fn draw(&mut self) -> Result<(), String> {
         self.init_map()?;
+        self.update_lights();
         for light in self.lights.values_mut() {
             light.draw(&mut self.canvas)?;
         }

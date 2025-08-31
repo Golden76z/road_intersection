@@ -1,7 +1,7 @@
 use rand::prelude::*;
 use sdl2::keyboard::Keycode;
 use sdl2::{event::Event, render::Canvas};
-
+use sdl2::mouse::SystemCursor::No;
 use crate::{
     config::{
         BOTTOM_DESTINATION, BOTTOM_SPAWN, LEFT_DESTINATION, LEFT_SPAWN, RIGHT_DESTINATION,
@@ -24,25 +24,25 @@ pub fn input_listener(event: Event, renderer: &mut Renderer) -> Result<(), Strin
             keycode: Some(Keycode::N),
             ..
         } => { 
-            renderer.change_state("North");
+            renderer.change_state("North",None);
         Ok(())},
 
         Event::KeyDown {
             keycode: Some(Keycode::W),
             ..
-        } => { renderer.change_state("West");
+        } => { renderer.change_state("West",None);
         Ok(())},
 
         Event::KeyDown {
             keycode: Some(Keycode::S),
             ..
-        } => { renderer.change_state("South"); 
+        } => { renderer.change_state("South",None); 
         Ok(())},
 
         Event::KeyDown {
             keycode: Some(Keycode::E),
             ..
-        } => { renderer.change_state("East");
+        } => { renderer.change_state("East",None);
         Ok(())},
 
         // Listening for the DOWN keypress

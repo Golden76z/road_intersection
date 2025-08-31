@@ -13,8 +13,9 @@ impl TrafficLight {
         Self { rect, state: false }
     }
 
-    pub fn change_state(&mut self) {
-        self.state = !self.state;
+    pub fn change_state(&mut self, state:Option<bool>) {
+        self.state = state.unwrap_or(!self.state)
+        
     }
     pub fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
         match self.state {

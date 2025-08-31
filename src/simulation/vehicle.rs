@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use sdl2;
 use sdl2::libc::abs;
 use sdl2::rect::Rect;
-use crate::config::{Direction, CASE_SIZE, EAST_LIGHT, NORTH_LIGHT, SOUTH_LIGHT, VEHICLE_HEIGHT, VEHICLE_SPEED, VEHICLE_WIDTH, WEST_LIGHT};
+use crate::config::{Direction, VehicleLane, CASE_SIZE, EAST_LIGHT, NORTH_LIGHT, SOUTH_LIGHT, VEHICLE_HEIGHT, VEHICLE_SPEED, VEHICLE_WIDTH, WEST_LIGHT};
 use crate::simulation::TrafficLight;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -68,11 +68,20 @@ impl<'a> Vehicle {
         let _ = canvas.fill_rect(self.shape);
     }
 
+    pub fn check_safe_distance(&mut self, waiting: &HashMap<String, HashSet<i32>>) -> bool {
+        if let Some(lane) = waiting.get(self.spawn.as_str()) {
+            if let Some(min_id) = lane.iter().filter(|&&id| id != self.id).min() {
+                return false
+            }
+        }
+        true
+    }
+
     // delta_time = 60 fps
-    pub fn r#move(&mut self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, lights: &HashMap<String,TrafficLight>) {
+    pub fn r#move(&mut self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, lights: &HashMap<String,TrafficLight>, waiting: &mut HashMap<String,HashSet<i32>>) {
         if self.speed > 0 && let Some(light) = lights.get(self.spawn.as_str()) {
-            if self.is_at_light() && !light.state {
-                self.position = self.position;
+            if (!self.check_safe_distance(waiting) || self.is_at_light()) && !light.state {
+                waiting.get_mut(self.spawn.as_str()).unwrap().insert(self.id);
             } else {
                 let offset :f32;
                 match self.direction {
@@ -83,6 +92,9 @@ impl<'a> Vehicle {
                 if self.is_at_turn(offset) && !self.as_turned {
                     self.as_turned = true;
                     self.update_vector();
+                }
+                if self.light_pasted() {
+                    waiting.get_mut(self.spawn.as_str()).unwrap().remove(&self.id);
                 }
                 let movement_distance = self.speed as f32 * 1.0 / 60.0;
                 self.position = (self.position.0 + self.vector.0 * movement_distance,self.position.1 + self.vector.1 * movement_distance) ;
@@ -106,6 +118,26 @@ impl<'a> Vehicle {
         let x = (self.position.0 - self.get_light_position().0).abs();
         let y = (self.position.1 - self.get_light_position().1).abs();
         x != 0.0 && x < 2.5 ||  y != 0.0 && y < 2.5
+    }
+
+    fn light_pasted(&self) -> bool {
+        let offset = CASE_SIZE as f32;
+        let x = self.position.0 - self.get_light_position().0 ;
+        let y = self.position.1 - self.get_light_position().1;
+        match self.spawn {
+            VehicleSpawn::West => {
+                (x - offset).abs() <= 5.0
+            },
+            VehicleSpawn::North => {
+                (y - offset).abs() <= 5.0
+            },
+            VehicleSpawn::South => {
+                y + offset <= 5.0
+            } ,
+            VehicleSpawn::East => {
+                x + offset <= 5.0
+            }
+        }
     }
 
     fn is_at_turn(&self,offset: f32) -> bool {

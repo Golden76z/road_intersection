@@ -1,3 +1,4 @@
+use std::cmp::max;
 use crate::simulation::Vehicle;
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
@@ -93,6 +94,7 @@ impl TrafficLanes {
             up: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
+
 }
 
 // Intersection vec, storing transitioning vehicles
