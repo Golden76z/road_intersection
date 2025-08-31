@@ -1,16 +1,18 @@
 use crate::config::*;
-use crate::simulation::{TrafficLanes, TrafficLight};
+use crate::simulation::{TrafficLanes, TrafficLight, Vehicle};
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 use sdl2::video::Window;
 use std::cmp::{max, min};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 pub struct Renderer {
     pub canvas: WindowCanvas,
     pub lights: HashMap<String, TrafficLight>,
     pub lanes: TrafficLanes,
+    pub waiting_lane: HashMap<String, HashMap<i32,Vehicle>>,
+    pub junction: HashSet<i32>
 }
 
 impl Renderer {
@@ -56,18 +58,56 @@ impl Renderer {
         ]);
 
         let lanes = TrafficLanes::new();
-
+        let waiting_lane : HashMap<String,HashMap<i32,Vehicle>> = HashMap::from([
+            (String::from("South"),HashMap::new()),
+            (String::from("North"),HashMap::new()),
+            (String::from("East"),HashMap::new()),
+            (String::from("West"),HashMap::new()),
+        ]);
+        let junction : HashSet<i32> = HashSet::new();
         Ok(Renderer {
             canvas,
             lights,
             lanes,
+            waiting_lane,
+            junction
         })
     }
 
     //Lights
     pub fn change_state(&mut self, s: &str) {
         if let Some(light) = self.lights.get_mut(s) {
-            light.change_state();
+            light.change_state(None);
+        }
+    }
+
+    pub fn update_lights(&mut self) {
+        if !self.junction.is_empty() {
+            return;
+        }
+        let mut max_lane: Option<&String> = None;
+        let mut max_count = 0;
+
+        for (lane_name, vehicles) in self.waiting_lane.iter() {
+            let count = vehicles.len();
+            if count > 0 {
+                if count > max_count {
+                    max_count = count;
+                    max_lane = Some(lane_name);
+                }
+            }
+        }
+
+        for (lane_name, light) in self.lights.iter_mut() {
+            if let Some(max_lane_name) = max_lane {
+                if lane_name == max_lane_name {
+                    light.change_state(Some(true));
+                } else {
+                    light.change_state(Some(false));
+                }
+            } else {
+                light.change_state(Some(false));
+            }
         }
     }
 
@@ -187,8 +227,9 @@ impl Renderer {
             let mut vehicles_to_remove = Vec::new();
 
             for (index, vehicle) in up_lane.iter_mut().enumerate() {
+                let waiting = self.waiting_lane.get_mut("North").unwrap();
                 let should_remove =
-                    vehicle.r#move(&mut self.canvas, &self.lights, &up_vehicles_clone);
+                    vehicle.r#move(&mut self.canvas, &self.lights, &up_vehicles_clone, waiting,&mut self.junction);
                 if should_remove {
                     vehicles_to_remove.push(index);
                 }
@@ -207,8 +248,9 @@ impl Renderer {
             let mut vehicles_to_remove = Vec::new();
 
             for (index, vehicle) in bottom_lane.iter_mut().enumerate() {
+                let waiting = self.waiting_lane.get_mut("South").unwrap();
                 let should_remove =
-                    vehicle.r#move(&mut self.canvas, &self.lights, &bottom_vehicles_clone);
+                    vehicle.r#move(&mut self.canvas, &self.lights, &bottom_vehicles_clone, waiting,&mut self.junction);
                 if should_remove {
                     vehicles_to_remove.push(index);
                 }
@@ -226,8 +268,9 @@ impl Renderer {
             let mut vehicles_to_remove = Vec::new();
 
             for (index, vehicle) in left_lane.iter_mut().enumerate() {
+                let waiting = self.waiting_lane.get_mut("West").unwrap();
                 let should_remove =
-                    vehicle.r#move(&mut self.canvas, &self.lights, &left_vehicles_clone);
+                    vehicle.r#move(&mut self.canvas, &self.lights, &left_vehicles_clone, waiting,&mut self.junction);
                 if should_remove {
                     vehicles_to_remove.push(index);
                 }
@@ -245,8 +288,9 @@ impl Renderer {
             let mut vehicles_to_remove = Vec::new();
 
             for (index, vehicle) in right_lane.iter_mut().enumerate() {
+                let waiting = self.waiting_lane.get_mut("East").unwrap();
                 let should_remove =
-                    vehicle.r#move(&mut self.canvas, &self.lights, &right_vehicles_clone);
+                    vehicle.r#move(&mut self.canvas, &self.lights, &right_vehicles_clone, waiting,&mut self.junction);
                 if should_remove {
                     vehicles_to_remove.push(index);
                 }
@@ -260,6 +304,7 @@ impl Renderer {
 
     pub fn draw(&mut self) -> Result<(), String> {
         self.init_map()?;
+        self.update_lights();
         for light in self.lights.values_mut() {
             light.draw(&mut self.canvas)?;
         }

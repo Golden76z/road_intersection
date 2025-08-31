@@ -18,7 +18,7 @@ use crate::config::{
 use crate::simulation::TrafficLight;
 use sdl2;
 use sdl2::rect::Rect;
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VehicleSpawn {
@@ -179,6 +179,8 @@ impl<'a> Vehicle {
         canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
         lights: &HashMap<String, TrafficLight>,
         vehicles: &VecDeque<Vehicle>, // Add vehicles parameter for collision detection
+        waiting: &mut HashMap<i32,Vehicle>,
+        junction: &mut HashSet<i32>
     ) -> bool {
         // Check if reached destination first
         if self.has_reached_destination() {
@@ -190,6 +192,7 @@ impl<'a> Vehicle {
         // Check traffic light
         if let Some(light) = lights.get(self.spawn.as_str()) {
             if self.is_at_light() && !light.state {
+                waiting.insert(self.id,self.to_owned());
                 should_stop = true;
             }
         }
@@ -206,6 +209,16 @@ impl<'a> Vehicle {
                 Direction::Left => offset = 2.0 * CASE_SIZE as f32,
                 Direction::Up => offset = 0.0,
             };
+            if self.light_pasted() {
+                junction.insert(self.id);
+                waiting.remove(&self.id);
+            }
+            if junction.contains(&self.id) {
+                let (x, y) = self.position;
+                if x < WEST_LIGHT.0 || x > EAST_LIGHT.0 || y < NORTH_LIGHT.1 || y > SOUTH_LIGHT.1 {
+                    junction.remove(&self.id);
+                }
+            }
             if self.is_at_turn(offset) && !self.as_turned {
                 self.as_turned = true;
                 self.update_vector();
@@ -235,6 +248,26 @@ impl<'a> Vehicle {
         let x = (self.position.0 - self.get_light_position().0).abs();
         let y = (self.position.1 - self.get_light_position().1).abs();
         x != 0.0 && x < 2.5 || y != 0.0 && y < 2.5
+    }
+
+    fn light_pasted(&self) -> bool {
+        let offset = CASE_SIZE as f32;
+        let x = self.position.0 - self.get_light_position().0 ;
+        let y = self.position.1 - self.get_light_position().1;
+        match self.spawn {
+            VehicleSpawn::West => {
+                (x - offset).abs() <= 5.0
+            },
+            VehicleSpawn::North => {
+                (y - offset).abs() <= 5.0
+            },
+            VehicleSpawn::South => {
+                y + offset <= 5.0
+            } ,
+            VehicleSpawn::East => {
+                x + offset <= 5.0
+            }
+        }
     }
 
     fn is_at_turn(&self, offset: f32) -> bool {
