@@ -1,14 +1,8 @@
 use rand::prelude::*;
+use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::{event::Event, render::Canvas};
 
-use crate::{
-    config::{
-        BOTTOM_DESTINATION, BOTTOM_SPAWN, LEFT_DESTINATION, LEFT_SPAWN, RIGHT_DESTINATION,
-        RIGHT_SPAWN, TrafficLanes, UP_DESTINATION, UP_SPAWN,
-    },
-    simulation::{Vehicle, VehicleDirection, spawn_vehicle},
-};
+use crate::simulation::TrafficLanes;
 
 pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> {
     // Input listening
@@ -24,18 +18,8 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             keycode: Some(Keycode::Down),
             ..
         } => {
-            println!("Down arrow pressed");
-
-            // Lock the bottom lane for checking and potentially adding
-            let mut bottom_lane = lanes.bottom.lock().unwrap();
-            if spawn_vehicle(&*bottom_lane) {
-                bottom_lane.push_back(Vehicle::new(
-                    1,
-                    BOTTOM_SPAWN,
-                    BOTTOM_DESTINATION,
-                    VehicleDirection::North,
-                ));
-            }
+            // println!("Down arrow pressed");
+            lanes.spawn_vehicle("down");
 
             Ok(())
         }
@@ -45,18 +29,8 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             keycode: Some(Keycode::Up),
             ..
         } => {
-            println!("Up arrow pressed");
-
-            // Lock the up lane for checking and potentially adding
-            let mut up_lane = lanes.up.lock().unwrap();
-            if spawn_vehicle(&*up_lane) {
-                up_lane.push_back(Vehicle::new(
-                    1,
-                    UP_SPAWN,
-                    UP_DESTINATION,
-                    VehicleDirection::South,
-                ));
-            }
+            // println!("Up arrow pressed");
+            lanes.spawn_vehicle("up");
 
             Ok(())
         }
@@ -66,18 +40,8 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             keycode: Some(Keycode::Left),
             ..
         } => {
-            println!("Left arrow pressed");
-
-            // Lock the left lane for checking and potentially adding
-            let mut left_lane = lanes.left.lock().unwrap();
-            if spawn_vehicle(&*left_lane) {
-                left_lane.push_back(Vehicle::new(
-                    1,
-                    LEFT_SPAWN,
-                    LEFT_DESTINATION,
-                    VehicleDirection::East,
-                ));
-            }
+            // println!("Left arrow pressed");
+            lanes.spawn_vehicle("left");
 
             Ok(())
         }
@@ -87,18 +51,8 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             keycode: Some(Keycode::Right),
             ..
         } => {
-            println!("Right arrow pressed");
-
-            // Lock the right lane for checking and potentially adding
-            let mut right_lane = lanes.right.lock().unwrap();
-            if spawn_vehicle(&*right_lane) {
-                right_lane.push_back(Vehicle::new(
-                    1,
-                    RIGHT_SPAWN,
-                    RIGHT_DESTINATION,
-                    VehicleDirection::West,
-                ));
-            }
+            // println!("Right arrow pressed");
+            lanes.spawn_vehicle("right");
 
             Ok(())
         }
@@ -114,16 +68,20 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
 
             match rand_num {
                 0 => {
-                    println!("Random generated Left Vehicle");
+                    // println!("Random generated Left Vehicle");
+                    lanes.spawn_vehicle("left");
                 }
                 1 => {
-                    println!("Random generated Right Vehicle");
+                    // println!("Random generated Right Vehicle");
+                    lanes.spawn_vehicle("right");
                 }
                 2 => {
-                    println!("Random generated Up Vehicle");
+                    // println!("Random generated Up Vehicle");
+                    lanes.spawn_vehicle("up");
                 }
                 _ => {
-                    println!("Random generated Down Vehicle");
+                    // println!("Random generated Down Vehicle");
+                    lanes.spawn_vehicle("down");
                 }
             }
 

@@ -52,27 +52,3 @@ impl Direction {
         }
     }
 }
-
-// Thread-safe vehicle lanes using Arc<Mutex<VecDeque<Vehicle>>>
-pub type VehicleLane = Arc<Mutex<VecDeque<Vehicle>>>;
-
-pub struct TrafficLanes {
-    pub left: VehicleLane,
-    pub right: VehicleLane,
-    pub bottom: VehicleLane,
-    pub up: VehicleLane,
-}
-
-impl TrafficLanes {
-    pub fn new() -> Self {
-        Self {
-            left: Arc::new(Mutex::new(VecDeque::new())),
-            right: Arc::new(Mutex::new(VecDeque::new())),
-            bottom: Arc::new(Mutex::new(VecDeque::new())),
-            up: Arc::new(Mutex::new(VecDeque::new())),
-        }
-    }
-}
-
-// Intersection vec, storing transitioning vehicles
-pub const INTERSECTION: VecDeque<Vehicle> = VecDeque::new();

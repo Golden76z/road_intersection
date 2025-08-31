@@ -1,5 +1,5 @@
 use crate::config::*;
-use crate::simulation::TrafficLight;
+use crate::simulation::{TrafficLanes, TrafficLight};
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
@@ -205,7 +205,6 @@ impl Renderer {
             light.draw(&mut self.canvas)?;
         }
 
-        self.canvas.present();
         Ok(())
     }
 }

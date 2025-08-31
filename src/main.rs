@@ -10,7 +10,6 @@ use crate::{
     render::Renderer,
 };
 use input::input_listener;
-use sdl2::pixels::Color;
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -46,7 +45,7 @@ pub fn main() {
 
         // Drawing the vehicles
         renderer.draw_vehicles();
-        renderer.canvas.set_draw_color(Color::RGB(0, 0, 0));
+
         renderer.canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }

@@ -1,6 +1,6 @@
 use sdl2;
 
-use crate::config::{VEHICLE_HEIGHT, VEHICLE_SPEED, VEHICLE_WIDTH};
+use crate::config::{Direction, VEHICLE_HEIGHT, VEHICLE_SPEED, VEHICLE_WIDTH};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VehicleDirection {
@@ -53,7 +53,14 @@ impl<'a> Vehicle {
     }
 
     pub fn render(&self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) {
-        canvas.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 255));
+        let color = match self.direction {
+            VehicleDirection::North => sdl2::pixels::Color::RGB(255, 0, 0),
+            VehicleDirection::South => sdl2::pixels::Color::RGB(0, 255, 0),
+            VehicleDirection::West => sdl2::pixels::Color::RGB(0, 0, 255),
+            VehicleDirection::East => sdl2::pixels::Color::RGB(255, 255, 0),
+        };
+
+        canvas.set_draw_color(color);
         let _ = canvas.fill_rect(self.shape);
     }
 
@@ -172,4 +179,3 @@ impl<'a> Vehicle {
             })
     }
 }
-
