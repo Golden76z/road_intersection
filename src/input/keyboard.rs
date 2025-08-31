@@ -7,10 +7,12 @@ use crate::{
         BOTTOM_DESTINATION, BOTTOM_SPAWN, LEFT_DESTINATION, LEFT_SPAWN, RIGHT_DESTINATION,
         RIGHT_SPAWN, TrafficLanes, UP_DESTINATION, UP_SPAWN,
     },
-    simulation::{Vehicle, VehicleDirection, spawn_vehicle},
+    simulation::{Vehicle,VehicleSpawn, spawn_vehicle},
 };
+use crate::config::{Direction, BOTTOM_VECTOR, LEFT_VECTOR, RIGHT_VECTOR, TOP_VECTOR};
+use crate::render::Renderer;
 
-pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> {
+pub fn input_listener(event: Event, renderer: &mut Renderer) -> Result<(), String> {
     // Input listening
     match event {
         Event::Quit { .. }
@@ -18,6 +20,30 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             keycode: Some(Keycode::Escape),
             ..
         } => return Err("Program end".to_string()),
+        Event::KeyDown {
+            keycode: Some(Keycode::N),
+            ..
+        } => { 
+            renderer.change_state("North");
+        Ok(())},
+
+        Event::KeyDown {
+            keycode: Some(Keycode::W),
+            ..
+        } => { renderer.change_state("West");
+        Ok(())},
+
+        Event::KeyDown {
+            keycode: Some(Keycode::S),
+            ..
+        } => { renderer.change_state("South"); 
+        Ok(())},
+
+        Event::KeyDown {
+            keycode: Some(Keycode::E),
+            ..
+        } => { renderer.change_state("East");
+        Ok(())},
 
         // Listening for the DOWN keypress
         Event::KeyDown {
@@ -27,13 +53,14 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             println!("Down arrow pressed");
 
             // Lock the bottom lane for checking and potentially adding
-            let mut bottom_lane = lanes.bottom.lock().unwrap();
+            let mut bottom_lane = renderer.lanes.bottom.lock().unwrap();
             if spawn_vehicle(&*bottom_lane) {
                 bottom_lane.push_back(Vehicle::new(
                     1,
                     BOTTOM_SPAWN,
-                    BOTTOM_DESTINATION,
-                    VehicleDirection::North,
+                    TOP_VECTOR,
+                    Direction::random(),
+                    VehicleSpawn::South,
                 ));
             }
 
@@ -48,13 +75,14 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             println!("Up arrow pressed");
 
             // Lock the up lane for checking and potentially adding
-            let mut up_lane = lanes.up.lock().unwrap();
+            let mut up_lane = renderer.lanes.up.lock().unwrap();
             if spawn_vehicle(&*up_lane) {
                 up_lane.push_back(Vehicle::new(
                     1,
                     UP_SPAWN,
-                    UP_DESTINATION,
-                    VehicleDirection::South,
+                    BOTTOM_VECTOR,
+                    Direction::random(),
+                    VehicleSpawn::North,
                 ));
             }
 
@@ -69,13 +97,14 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             println!("Left arrow pressed");
 
             // Lock the left lane for checking and potentially adding
-            let mut left_lane = lanes.left.lock().unwrap();
+            let mut left_lane = renderer.lanes.left.lock().unwrap();
             if spawn_vehicle(&*left_lane) {
                 left_lane.push_back(Vehicle::new(
                     1,
                     LEFT_SPAWN,
-                    LEFT_DESTINATION,
-                    VehicleDirection::East,
+                    RIGHT_VECTOR,
+                    Direction::random(),
+                    VehicleSpawn::West,
                 ));
             }
 
@@ -90,13 +119,14 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             println!("Right arrow pressed");
 
             // Lock the right lane for checking and potentially adding
-            let mut right_lane = lanes.right.lock().unwrap();
+            let mut right_lane = renderer.lanes.right.lock().unwrap();
             if spawn_vehicle(&*right_lane) {
                 right_lane.push_back(Vehicle::new(
                     1,
                     RIGHT_SPAWN,
-                    RIGHT_DESTINATION,
-                    VehicleDirection::West,
+                    LEFT_VECTOR,
+                    Direction::Right,
+                    VehicleSpawn::East
                 ));
             }
 

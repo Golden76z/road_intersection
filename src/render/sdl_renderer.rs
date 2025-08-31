@@ -20,8 +20,8 @@ impl Renderer {
             (
                 String::from("North"),
                 TrafficLight::new(Rect::new(
-                    (GRID_WIDTH_PIXELS / 2 - 2 * CASE_SIZE - 1).cast_signed(),
-                    (GRID_HEIGHT_PIXELS / 2 - 2 * CASE_SIZE - 1).cast_signed(),
+                    (CANVA_WIDTH / 2 - 2 * CASE_SIZE - 1).cast_signed(),
+                    (CANVA_HEIGHT / 2 - 2 * CASE_SIZE - 1).cast_signed(),
                     CASE_SIZE,
                     CASE_SIZE,
                 )),
@@ -29,8 +29,8 @@ impl Renderer {
             (
                 String::from("East"),
                 TrafficLight::new(Rect::new(
-                    (GRID_WIDTH_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
-                    (GRID_HEIGHT_PIXELS / 2 - 2 * CASE_SIZE - 1).cast_signed(),
+                    (CANVA_WIDTH / 2 + CASE_SIZE + 1).cast_signed(),
+                    (CANVA_HEIGHT / 2 - 2 * CASE_SIZE - 1).cast_signed(),
                     CASE_SIZE,
                     CASE_SIZE,
                 )),
@@ -38,8 +38,8 @@ impl Renderer {
             (
                 String::from("West"),
                 TrafficLight::new(Rect::new(
-                    (GRID_WIDTH_PIXELS / 2 - 2 * CASE_SIZE - 1).cast_signed(),
-                    (GRID_HEIGHT_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
+                    (CANVA_WIDTH / 2 - 2 * CASE_SIZE - 1).cast_signed(),
+                    (CANVA_HEIGHT / 2 + CASE_SIZE + 1).cast_signed(),
                     CASE_SIZE,
                     CASE_SIZE,
                 )),
@@ -47,8 +47,8 @@ impl Renderer {
             (
                 String::from("South"),
                 TrafficLight::new(Rect::new(
-                    (GRID_WIDTH_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
-                    (GRID_HEIGHT_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
+                    (CANVA_WIDTH / 2 + CASE_SIZE + 1).cast_signed(),
+                    (CANVA_HEIGHT / 2 + CASE_SIZE + 1).cast_signed(),
                     CASE_SIZE,
                     CASE_SIZE,
                 )),
@@ -117,60 +117,60 @@ impl Renderer {
         self.canvas.draw_rect(Rect::new(
             -1,
             -1,
-            GRID_WIDTH_PIXELS / 2 - CASE_SIZE,
-            GRID_HEIGHT_PIXELS / 2 - CASE_SIZE,
+            CANVA_WIDTH / 2 - CASE_SIZE,
+            CANVA_HEIGHT / 2 - CASE_SIZE,
         ))?;
         self.canvas.draw_rect(Rect::new(
-            (GRID_WIDTH_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
+            (CANVA_WIDTH / 2 + CASE_SIZE + 1).cast_signed(),
             -1,
-            GRID_WIDTH_PIXELS / 2 - CASE_SIZE,
-            GRID_HEIGHT_PIXELS / 2 - CASE_SIZE,
+            CANVA_WIDTH / 2 - CASE_SIZE,
+            CANVA_HEIGHT / 2 - CASE_SIZE,
         ))?;
         self.canvas.draw_rect(Rect::new(
             -1,
-            (GRID_HEIGHT_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
-            GRID_WIDTH_PIXELS / 2 - CASE_SIZE,
-            GRID_HEIGHT_PIXELS / 2 - CASE_SIZE,
+            (CANVA_HEIGHT / 2 + CASE_SIZE + 1).cast_signed(),
+            CANVA_WIDTH / 2 - CASE_SIZE,
+            CANVA_HEIGHT / 2 - CASE_SIZE,
         ))?;
         self.canvas.draw_rect(Rect::new(
-            (GRID_WIDTH_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
-            (GRID_HEIGHT_PIXELS / 2 + CASE_SIZE + 1).cast_signed(),
-            GRID_WIDTH_PIXELS / 2 - CASE_SIZE,
-            GRID_HEIGHT_PIXELS / 2 - CASE_SIZE,
+            (CANVA_WIDTH / 2 + CASE_SIZE + 1).cast_signed(),
+            (CANVA_HEIGHT / 2 + CASE_SIZE + 1).cast_signed(),
+            CANVA_WIDTH / 2 - CASE_SIZE,
+            CANVA_HEIGHT / 2 - CASE_SIZE,
         ))?;
 
         self.draw_dotted_line(
-            (-5, (GRID_HEIGHT_PIXELS / 2).cast_signed()),
+            (-5, (CANVA_HEIGHT / 2).cast_signed()),
             (
-                (GRID_WIDTH_PIXELS / 2 - CASE_SIZE).cast_signed(),
-                (GRID_HEIGHT_PIXELS / 2).cast_signed(),
+                (CANVA_WIDTH / 2 - CASE_SIZE).cast_signed(),
+                (CANVA_HEIGHT / 2).cast_signed(),
             ),
         )?;
         self.draw_dotted_line(
-            ((GRID_WIDTH_PIXELS / 2).cast_signed(), -5),
+            ((CANVA_WIDTH / 2).cast_signed(), -5),
             (
-                (GRID_WIDTH_PIXELS / 2).cast_signed(),
-                (GRID_HEIGHT_PIXELS / 2 - CASE_SIZE).cast_signed(),
-            ),
-        )?;
-        self.draw_dotted_line(
-            (
-                GRID_WIDTH_PIXELS.cast_signed(),
-                (GRID_HEIGHT_PIXELS / 2).cast_signed(),
-            ),
-            (
-                (GRID_WIDTH_PIXELS / 2 + CASE_SIZE).cast_signed(),
-                (GRID_HEIGHT_PIXELS / 2).cast_signed(),
+                (CANVA_WIDTH / 2).cast_signed(),
+                (CANVA_HEIGHT / 2 - CASE_SIZE).cast_signed(),
             ),
         )?;
         self.draw_dotted_line(
             (
-                (GRID_WIDTH_PIXELS / 2).cast_signed(),
-                GRID_HEIGHT_PIXELS.cast_signed(),
+                CANVA_WIDTH.cast_signed(),
+                (CANVA_HEIGHT / 2).cast_signed(),
             ),
             (
-                (GRID_WIDTH_PIXELS / 2).cast_signed(),
-                (GRID_HEIGHT_PIXELS / 2 + CASE_SIZE).cast_signed(),
+                (CANVA_WIDTH / 2 + CASE_SIZE).cast_signed(),
+                (CANVA_HEIGHT / 2).cast_signed(),
+            ),
+        )?;
+        self.draw_dotted_line(
+            (
+                (CANVA_WIDTH / 2).cast_signed(),
+                CANVA_HEIGHT.cast_signed(),
+            ),
+            (
+                (CANVA_WIDTH / 2).cast_signed(),
+                (CANVA_HEIGHT / 2 + CASE_SIZE).cast_signed(),
             ),
         )?;
 
@@ -180,22 +180,22 @@ impl Renderer {
     pub fn draw_vehicles(&mut self) {
         // Drawing the up lane vehicles
         for item in self.lanes.up.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+            item.r#move(&mut self.canvas, &self.lights);
         }
 
         // Drawing the bottom lane vehicles
         for item in self.lanes.bottom.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+            item.r#move(&mut self.canvas, &self.lights);
         }
 
         // Drawing the left lane vehicles
         for item in self.lanes.left.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+            item.r#move(&mut self.canvas, &self.lights);
         }
 
         // Drawing the right lane vehicles
         for item in self.lanes.right.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+            item.r#move(&mut self.canvas, &self.lights);
         }
     }
 
@@ -205,7 +205,6 @@ impl Renderer {
             light.draw(&mut self.canvas)?;
         }
 
-        self.canvas.present();
         Ok(())
     }
 }
