@@ -31,7 +31,7 @@ pub fn main() {
 
         // Input listener - Vehicle spawning
         for event in event_pump.poll_iter() {
-            match input_listener(event, &renderer.lanes) {
+            match input_listener(event, &mut renderer) {
                 Ok(()) => {}
                 Err(msg) => {
                     println!("{}", msg);

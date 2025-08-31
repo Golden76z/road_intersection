@@ -2,9 +2,10 @@ use rand::prelude::*;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
+use crate::render::Renderer;
 use crate::simulation::TrafficLanes;
 
-pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> {
+pub fn input_listener(event: Event, renderer: &mut Renderer) -> Result<(), String> {
     // Input listening
     match event {
         Event::Quit { .. }
@@ -13,13 +14,45 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             ..
         } => return Err("Program end".to_string()),
 
+        Event::KeyDown {
+            keycode: Some(Keycode::N),
+            ..
+        } => {
+            renderer.change_state("North");
+            Ok(())
+        }
+
+        Event::KeyDown {
+            keycode: Some(Keycode::W),
+            ..
+        } => {
+            renderer.change_state("West");
+            Ok(())
+        }
+
+        Event::KeyDown {
+            keycode: Some(Keycode::S),
+            ..
+        } => {
+            renderer.change_state("South");
+            Ok(())
+        }
+
+        Event::KeyDown {
+            keycode: Some(Keycode::E),
+            ..
+        } => {
+            renderer.change_state("East");
+            Ok(())
+        }
+
         // Listening for the DOWN keypress
         Event::KeyDown {
             keycode: Some(Keycode::Down),
             ..
         } => {
             // println!("Down arrow pressed");
-            lanes.spawn_vehicle("down");
+            renderer.lanes.spawn_vehicle("down");
 
             Ok(())
         }
@@ -30,7 +63,7 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             ..
         } => {
             // println!("Up arrow pressed");
-            lanes.spawn_vehicle("up");
+            renderer.lanes.spawn_vehicle("up");
 
             Ok(())
         }
@@ -41,7 +74,7 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             ..
         } => {
             // println!("Left arrow pressed");
-            lanes.spawn_vehicle("left");
+            renderer.lanes.spawn_vehicle("left");
 
             Ok(())
         }
@@ -52,7 +85,7 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             ..
         } => {
             // println!("Right arrow pressed");
-            lanes.spawn_vehicle("right");
+            renderer.lanes.spawn_vehicle("right");
 
             Ok(())
         }
@@ -69,19 +102,19 @@ pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> 
             match rand_num {
                 0 => {
                     // println!("Random generated Left Vehicle");
-                    lanes.spawn_vehicle("left");
+                    renderer.lanes.spawn_vehicle("left");
                 }
                 1 => {
                     // println!("Random generated Right Vehicle");
-                    lanes.spawn_vehicle("right");
+                    renderer.lanes.spawn_vehicle("right");
                 }
                 2 => {
                     // println!("Random generated Up Vehicle");
-                    lanes.spawn_vehicle("up");
+                    renderer.lanes.spawn_vehicle("up");
                 }
                 _ => {
                     // println!("Random generated Down Vehicle");
-                    lanes.spawn_vehicle("down");
+                    renderer.lanes.spawn_vehicle("down");
                 }
             }
 

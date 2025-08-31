@@ -63,6 +63,7 @@ impl Renderer {
             lanes,
         })
     }
+
     //Lights
     pub fn change_state(&mut self, s: &str) {
         if let Some(light) = self.lights.get_mut(s) {
@@ -108,6 +109,7 @@ impl Renderer {
             }
         }
     }
+
     fn init_map(&mut self) -> Result<(), String> {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
@@ -178,24 +180,81 @@ impl Renderer {
     }
 
     pub fn draw_vehicles(&mut self) {
-        // Drawing the up lane vehicles
-        for item in self.lanes.up.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+        // Handle up lane vehicles
+        {
+            let mut up_lane = self.lanes.up.lock().unwrap();
+            let up_vehicles_clone = up_lane.clone(); // Clone for collision detection
+            let mut vehicles_to_remove = Vec::new();
+
+            for (index, vehicle) in up_lane.iter_mut().enumerate() {
+                let should_remove =
+                    vehicle.r#move(&mut self.canvas, &self.lights, &up_vehicles_clone);
+                if should_remove {
+                    vehicles_to_remove.push(index);
+                }
+            }
+
+            // Remove vehicles that reached destination (in reverse order to maintain indices)
+            for &index in vehicles_to_remove.iter().rev() {
+                up_lane.remove(index);
+            }
         }
 
-        // Drawing the bottom lane vehicles
-        for item in self.lanes.bottom.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+        // Handle bottom lane vehicles
+        {
+            let mut bottom_lane = self.lanes.bottom.lock().unwrap();
+            let bottom_vehicles_clone = bottom_lane.clone();
+            let mut vehicles_to_remove = Vec::new();
+
+            for (index, vehicle) in bottom_lane.iter_mut().enumerate() {
+                let should_remove =
+                    vehicle.r#move(&mut self.canvas, &self.lights, &bottom_vehicles_clone);
+                if should_remove {
+                    vehicles_to_remove.push(index);
+                }
+            }
+
+            for &index in vehicles_to_remove.iter().rev() {
+                bottom_lane.remove(index);
+            }
         }
 
-        // Drawing the left lane vehicles
-        for item in self.lanes.left.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+        // Handle left lane vehicles
+        {
+            let mut left_lane = self.lanes.left.lock().unwrap();
+            let left_vehicles_clone = left_lane.clone();
+            let mut vehicles_to_remove = Vec::new();
+
+            for (index, vehicle) in left_lane.iter_mut().enumerate() {
+                let should_remove =
+                    vehicle.r#move(&mut self.canvas, &self.lights, &left_vehicles_clone);
+                if should_remove {
+                    vehicles_to_remove.push(index);
+                }
+            }
+
+            for &index in vehicles_to_remove.iter().rev() {
+                left_lane.remove(index);
+            }
         }
 
-        // Drawing the right lane vehicles
-        for item in self.lanes.right.lock().unwrap().iter_mut() {
-            item.r#move(&mut self.canvas);
+        // Handle right lane vehicles
+        {
+            let mut right_lane = self.lanes.right.lock().unwrap();
+            let right_vehicles_clone = right_lane.clone();
+            let mut vehicles_to_remove = Vec::new();
+
+            for (index, vehicle) in right_lane.iter_mut().enumerate() {
+                let should_remove =
+                    vehicle.r#move(&mut self.canvas, &self.lights, &right_vehicles_clone);
+                if should_remove {
+                    vehicles_to_remove.push(index);
+                }
+            }
+
+            for &index in vehicles_to_remove.iter().rev() {
+                right_lane.remove(index);
+            }
         }
     }
 
@@ -206,5 +265,14 @@ impl Renderer {
         }
 
         Ok(())
+    }
+
+    // Debug method to print the lane's vehicles
+    pub fn _print_debug_info(&self) {
+        let (up, bottom, left, right) = self.lanes.get_lane_counts();
+        println!(
+            "Vehicle counts - Up: {}, Bottom: {}, Left: {}, Right: {}",
+            up, bottom, left, right
+        );
     }
 }

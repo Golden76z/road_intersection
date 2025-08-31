@@ -1,16 +1,13 @@
+use crate::{
+    config::{
+        BOTTOM_SPAWN, BOTTOM_VECTOR, Direction, LEFT_SPAWN, LEFT_VECTOR, RIGHT_SPAWN, RIGHT_VECTOR,
+        TOP_VECTOR, UP_SPAWN,
+    },
+    simulation::{Vehicle, VehicleSpawn, can_spawn_vehicle},
+};
 use std::{
     collections::VecDeque,
     sync::{Arc, Mutex},
-};
-
-use rand::Rng;
-
-use crate::{
-    config::{
-        BOTTOM_DESTINATION, BOTTOM_SPAWN, LEFT_DESTINATION, LEFT_SPAWN, RIGHT_DESTINATION,
-        RIGHT_SPAWN, UP_DESTINATION, UP_SPAWN,
-    },
-    simulation::{Vehicle, VehicleDirection, can_spawn_vehicle},
 };
 
 // Thread-safe vehicle lanes using Arc<Mutex<VecDeque<Vehicle>>>
@@ -21,6 +18,7 @@ pub struct TrafficLanes {
     pub right: VehicleLane,
     pub bottom: VehicleLane,
     pub up: VehicleLane,
+    vehicle_id_counter: Arc<Mutex<i32>>, // To assign unique IDs to vehicles
 }
 
 impl TrafficLanes {
@@ -30,76 +28,87 @@ impl TrafficLanes {
             right: Arc::new(Mutex::new(VecDeque::new())),
             bottom: Arc::new(Mutex::new(VecDeque::new())),
             up: Arc::new(Mutex::new(VecDeque::new())),
+            vehicle_id_counter: Arc::new(Mutex::new(0)),
         }
     }
 
-    pub fn spawn_vehicle(&self, spawn_point: &str) {
-        let direction: VehicleDirection;
-        let mut rng = rand::rng();
-        let rand_num = rng.random_range(0..3);
+    fn get_next_vehicle_id(&self) -> i32 {
+        let mut counter = self.vehicle_id_counter.lock().unwrap();
+        *counter += 1;
+        *counter
+    }
 
+    pub fn spawn_vehicle(&self, spawn_point: &str) {
         match spawn_point {
             "up" => {
-                match rand_num {
-                    0 => direction = VehicleDirection::West,
-                    1 => direction = VehicleDirection::South,
-                    _ => direction = VehicleDirection::East,
-                }
-
                 let mut up_lane = self.up.lock().unwrap();
-                if can_spawn_vehicle(&*up_lane) {
-                    up_lane.push_back(Vehicle::new(1, UP_SPAWN, UP_DESTINATION, direction));
+                if can_spawn_vehicle(&up_lane) {
+                    up_lane.push_back(Vehicle::new(
+                        self.get_next_vehicle_id(),
+                        UP_SPAWN,
+                        BOTTOM_VECTOR,
+                        Direction::random(),
+                        VehicleSpawn::North,
+                    ));
                 }
             }
             "down" => {
-                match rand_num {
-                    0 => direction = VehicleDirection::West,
-                    1 => direction = VehicleDirection::North,
-                    _ => direction = VehicleDirection::East,
-                }
-
                 let mut bottom_lane = self.bottom.lock().unwrap();
-                if can_spawn_vehicle(&*bottom_lane) {
+                if can_spawn_vehicle(&bottom_lane) {
                     bottom_lane.push_back(Vehicle::new(
-                        1,
+                        self.get_next_vehicle_id(),
                         BOTTOM_SPAWN,
-                        BOTTOM_DESTINATION,
-                        direction,
+                        TOP_VECTOR,
+                        Direction::random(),
+                        VehicleSpawn::South,
                     ));
                 }
             }
             "left" => {
-                match rand_num {
-                    0 => direction = VehicleDirection::North,
-                    1 => direction = VehicleDirection::East,
-                    _ => direction = VehicleDirection::South,
-                }
-
                 let mut left_lane = self.left.lock().unwrap();
-                if can_spawn_vehicle(&*left_lane) {
-                    left_lane.push_back(Vehicle::new(1, LEFT_SPAWN, LEFT_DESTINATION, direction));
+                if can_spawn_vehicle(&left_lane) {
+                    left_lane.push_back(Vehicle::new(
+                        self.get_next_vehicle_id(),
+                        LEFT_SPAWN,
+                        RIGHT_VECTOR,
+                        Direction::random(),
+                        VehicleSpawn::West,
+                    ));
                 }
             }
             _ => {
-                match rand_num {
-                    0 => direction = VehicleDirection::South,
-                    1 => direction = VehicleDirection::East,
-                    _ => direction = VehicleDirection::North,
-                }
-
+                // "right"
                 let mut right_lane = self.right.lock().unwrap();
-                if can_spawn_vehicle(&*right_lane) {
+                if can_spawn_vehicle(&right_lane) {
                     right_lane.push_back(Vehicle::new(
-                        1,
+                        self.get_next_vehicle_id(),
                         RIGHT_SPAWN,
-                        RIGHT_DESTINATION,
-                        direction,
+                        LEFT_VECTOR,
+                        Direction::random(),
+                        VehicleSpawn::East,
                     ));
                 }
             }
         }
     }
-}
 
-// Intersection vec, storing transitioning vehicles
-pub const INTERSECTION: VecDeque<Vehicle> = VecDeque::new();
+    // Method to get total vehicle count across all lanes (useful for debugging)
+    pub fn total_vehicle_count(&self) -> usize {
+        let up_count = self.up.lock().unwrap().len();
+        let bottom_count = self.bottom.lock().unwrap().len();
+        let left_count = self.left.lock().unwrap().len();
+        let right_count = self.right.lock().unwrap().len();
+
+        up_count + bottom_count + left_count + right_count
+    }
+
+    // Method to get vehicle counts for each lane (useful for debugging)
+    pub fn get_lane_counts(&self) -> (usize, usize, usize, usize) {
+        let up_count = self.up.lock().unwrap().len();
+        let bottom_count = self.bottom.lock().unwrap().len();
+        let left_count = self.left.lock().unwrap().len();
+        let right_count = self.right.lock().unwrap().len();
+
+        (up_count, bottom_count, left_count, right_count)
+    }
+}
