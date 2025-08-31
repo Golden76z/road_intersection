@@ -27,7 +27,7 @@ impl<'a> Vehicle {
         target: (f32, f32),
         direction: VehicleDirection,
     ) -> Self {
-        Vehicle {
+        let mut vehicle = Vehicle {
             id,
             position,
             target,
@@ -47,13 +47,12 @@ impl<'a> Vehicle {
                     VEHICLE_WIDTH,
                 ),
             },
-        }
+        };
+        vehicle.accelerate();
+        vehicle
     }
 
-    pub fn render(
-        &self,
-        canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
-    ) {
+    pub fn render(&self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>) {
         canvas.set_draw_color(sdl2::pixels::Color::RGB(0, 0, 255));
         let _ = canvas.fill_rect(self.shape);
     }
@@ -72,7 +71,7 @@ impl<'a> Vehicle {
                 let normalized_y = direction.1 / distance;
 
                 let movement_distance = self.speed as f32 * 1.0 / 60.0;
-                
+
                 // Vérifier si on va dépasser la cible
                 if distance <= movement_distance {
                     // On arrive à la cible, s'arrêter là
@@ -82,7 +81,7 @@ impl<'a> Vehicle {
                     self.position.0 += normalized_x * movement_distance;
                     self.position.1 += normalized_y * movement_distance;
                 }
-                
+
                 // IMPORTANT: Mettre à jour le shape après avoir changé la position
                 self.update_shape();
             }
@@ -140,10 +139,7 @@ impl<'a> Vehicle {
         distance > (self.speed as f32 * 1.0 / 60.0)
     }
 
-    pub fn find_closest_vehicle_ahead(
-        &'a self,
-        vehicles: &'a [Vehicle],
-    ) -> Option<&'a Vehicle> {
+    pub fn find_closest_vehicle_ahead(&'a self, vehicles: &'a [Vehicle]) -> Option<&'a Vehicle> {
         vehicles
             .iter()
             .filter(|&other| other.id != self.id)
@@ -176,3 +172,4 @@ impl<'a> Vehicle {
             })
     }
 }
+

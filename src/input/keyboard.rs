@@ -1,26 +1,16 @@
-use std::thread::spawn;
-
 use rand::prelude::*;
-
 use sdl2::keyboard::Keycode;
 use sdl2::{event::Event, render::Canvas};
 
-// use crate::config::{
-//     BOTTOM, BOTTOM_DESTINATION, BOTTOM_SPAWN, CANVA_WIDTH, VEHICLE_SPEED, VEHICLE_WIDTH,
-// };
 use crate::{
     config::{
-        BOTTOM_DESTINATION, BOTTOM_SPAWN, TrafficLanes, VEHICLE_HEIGHT, VEHICLE_SPEED,
-        VEHICLE_WIDTH,
+        BOTTOM_DESTINATION, BOTTOM_SPAWN, LEFT_DESTINATION, LEFT_SPAWN, RIGHT_DESTINATION,
+        RIGHT_SPAWN, TrafficLanes, UP_DESTINATION, UP_SPAWN,
     },
     simulation::{Vehicle, VehicleDirection, spawn_vehicle},
 };
 
-pub fn input_listener(
-    event: Event,
-    lanes: &TrafficLanes,
-    canvas: &mut Canvas<sdl2::video::Window>,
-) -> Result<(), String> {
+pub fn input_listener(event: Event, lanes: &TrafficLanes) -> Result<(), String> {
     // Input listening
     match event {
         Event::Quit { .. }
@@ -34,7 +24,7 @@ pub fn input_listener(
             keycode: Some(Keycode::Down),
             ..
         } => {
-            println!("Up arrow pressed");
+            println!("Down arrow pressed");
 
             // Lock the bottom lane for checking and potentially adding
             let mut bottom_lane = lanes.bottom.lock().unwrap();
@@ -46,8 +36,7 @@ pub fn input_listener(
                     VehicleDirection::North,
                 ));
             }
-            let length = bottom_lane.len() - 1;
-            bottom_lane[length].accelerate();
+
             Ok(())
         }
 
@@ -56,7 +45,19 @@ pub fn input_listener(
             keycode: Some(Keycode::Up),
             ..
         } => {
-            println!("Down arrow pressed");
+            println!("Up arrow pressed");
+
+            // Lock the up lane for checking and potentially adding
+            let mut up_lane = lanes.up.lock().unwrap();
+            if spawn_vehicle(&*up_lane) {
+                up_lane.push_back(Vehicle::new(
+                    1,
+                    UP_SPAWN,
+                    UP_DESTINATION,
+                    VehicleDirection::South,
+                ));
+            }
+
             Ok(())
         }
 
@@ -66,6 +67,18 @@ pub fn input_listener(
             ..
         } => {
             println!("Left arrow pressed");
+
+            // Lock the left lane for checking and potentially adding
+            let mut left_lane = lanes.left.lock().unwrap();
+            if spawn_vehicle(&*left_lane) {
+                left_lane.push_back(Vehicle::new(
+                    1,
+                    LEFT_SPAWN,
+                    LEFT_DESTINATION,
+                    VehicleDirection::East,
+                ));
+            }
+
             Ok(())
         }
 
@@ -75,6 +88,18 @@ pub fn input_listener(
             ..
         } => {
             println!("Right arrow pressed");
+
+            // Lock the right lane for checking and potentially adding
+            let mut right_lane = lanes.right.lock().unwrap();
+            if spawn_vehicle(&*right_lane) {
+                right_lane.push_back(Vehicle::new(
+                    1,
+                    RIGHT_SPAWN,
+                    RIGHT_DESTINATION,
+                    VehicleDirection::West,
+                ));
+            }
+
             Ok(())
         }
 
