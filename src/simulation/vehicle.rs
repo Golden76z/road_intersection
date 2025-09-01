@@ -179,8 +179,8 @@ impl<'a> Vehicle {
         canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
         lights: &HashMap<String, TrafficLight>,
         vehicles: &VecDeque<Vehicle>, // Add vehicles parameter for collision detection
-        waiting: &mut HashMap<i32,Vehicle>,
-        junction: &mut HashSet<i32>
+        waiting: &mut HashMap<i32, Vehicle>,
+        junction: &mut HashSet<i32>,
     ) -> bool {
         // Check if reached destination first
         if self.has_reached_destination() {
@@ -192,7 +192,7 @@ impl<'a> Vehicle {
         // Check traffic light
         if let Some(light) = lights.get(self.spawn.as_str()) {
             if self.is_at_light() && !light.state {
-                waiting.insert(self.id,self.to_owned());
+                waiting.insert(self.id, self.to_owned());
                 should_stop = true;
             }
         }
@@ -200,7 +200,7 @@ impl<'a> Vehicle {
         // Check for vehicle ahead
         if !should_stop && let Some(vehicle_id) = self.is_vehicle_ahead(vehicles) {
             if waiting.contains_key(&vehicle_id) {
-                waiting.insert(self.id,self.to_owned());
+                waiting.insert(self.id, self.to_owned());
             }
             should_stop = true;
         }
@@ -255,21 +255,13 @@ impl<'a> Vehicle {
 
     fn light_pasted(&self) -> bool {
         let offset = CASE_SIZE as f32;
-        let x = self.position.0 - self.get_light_position().0 ;
+        let x = self.position.0 - self.get_light_position().0;
         let y = self.position.1 - self.get_light_position().1;
         match self.spawn {
-            VehicleSpawn::West => {
-                (x - offset).abs() <= 5.0
-            },
-            VehicleSpawn::North => {
-                (y - offset).abs() <= 5.0
-            },
-            VehicleSpawn::South => {
-                y + offset <= 5.0
-            } ,
-            VehicleSpawn::East => {
-                x + offset <= 5.0
-            }
+            VehicleSpawn::West => (x - offset).abs() <= 5.0,
+            VehicleSpawn::North => (y - offset).abs() <= 5.0,
+            VehicleSpawn::South => y + offset <= 5.0,
+            VehicleSpawn::East => x + offset <= 5.0,
         }
     }
 
@@ -310,19 +302,8 @@ impl<'a> Vehicle {
         )
     }
 
-    pub fn brake(&mut self) {
-        self.speed = 0;
-    }
-
     pub fn accelerate(&mut self) {
         self.speed = VEHICLE_SPEED;
-    }
-
-    pub fn is_safe_distance(&self, other: &Vehicle) -> bool {
-        let distance = ((self.position.0 - other.position.0).powi(2)
-            + (self.position.1 - other.position.1).powi(2))
-        .sqrt();
-        distance > (self.speed as f32 * 1.0 / 60.0)
     }
 }
 

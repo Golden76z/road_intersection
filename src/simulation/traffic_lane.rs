@@ -13,12 +13,14 @@ use std::{
 // Thread-safe vehicle lanes using Arc<Mutex<VecDeque<Vehicle>>>
 pub type VehicleLane = Arc<Mutex<VecDeque<Vehicle>>>;
 
+// Four lanes for the 4 spawn points
 pub struct TrafficLanes {
     pub left: VehicleLane,
     pub right: VehicleLane,
     pub bottom: VehicleLane,
     pub up: VehicleLane,
-    vehicle_id_counter: Arc<Mutex<i32>>, // To assign unique IDs to vehicles
+    // To assign unique IDs to vehicles
+    vehicle_id_counter: Arc<Mutex<i32>>,
 }
 
 impl TrafficLanes {
@@ -38,9 +40,11 @@ impl TrafficLanes {
         *counter
     }
 
+    // Method to spawn a vehicle to a given direction
     pub fn spawn_vehicle(&self, spawn_point: &str) {
         match spawn_point {
             "up" => {
+                // Lock the Arc for safety
                 let mut up_lane = self.up.lock().unwrap();
                 if can_spawn_vehicle(&up_lane) {
                     up_lane.push_back(Vehicle::new(
@@ -50,6 +54,7 @@ impl TrafficLanes {
                         Direction::random(),
                         VehicleSpawn::North,
                     ));
+                    // Lock ends when out of scope
                 }
             }
             "down" => {
@@ -93,7 +98,7 @@ impl TrafficLanes {
     }
 
     // Method to get total vehicle count across all lanes (useful for debugging)
-    pub fn total_vehicle_count(&self) -> usize {
+    pub fn _total_vehicle_count(&self) -> usize {
         let up_count = self.up.lock().unwrap().len();
         let bottom_count = self.bottom.lock().unwrap().len();
         let left_count = self.left.lock().unwrap().len();
@@ -103,7 +108,7 @@ impl TrafficLanes {
     }
 
     // Method to get vehicle counts for each lane (useful for debugging)
-    pub fn get_lane_counts(&self) -> (usize, usize, usize, usize) {
+    pub fn _get_lane_counts(&self) -> (usize, usize, usize, usize) {
         let up_count = self.up.lock().unwrap().len();
         let bottom_count = self.bottom.lock().unwrap().len();
         let left_count = self.left.lock().unwrap().len();

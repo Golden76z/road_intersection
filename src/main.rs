@@ -12,6 +12,8 @@ use crate::{
 use input::input_listener;
 
 pub fn main() {
+    println!("<---- Road intersection start ---->");
+
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
@@ -46,7 +48,10 @@ pub fn main() {
         // Drawing the vehicles
         renderer.draw_vehicles();
 
+        // Render the drawn picture to the screen
         renderer.canvas.present();
+
+        // Time between each loops - Frame rate
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }

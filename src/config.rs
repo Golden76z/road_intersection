@@ -15,22 +15,23 @@ pub const VEHICLE_HEIGHT: u32 = CANVA_HEIGHT / 20;
 // pub const TRAFFIC_LIGHT_WIDTH: u32 = CANVA_WIDTH / 20;
 // pub const TRAFFIC_LIGHT_HEIGHT: u32 = CANVA_HEIGHT / 20;
 pub const SAFE_DISTANCE: u32 = VEHICLE_WIDTH;
-pub const VEHICLE_PER_LANE: u32 =
-    (CANVA_WIDTH / 2 - VEHICLE_WIDTH) / (VEHICLE_WIDTH + SAFE_DISTANCE);
 pub const VEHICLE_SPEED: u16 = 200;
 
-// Starting and Ending positions of the Vehicles
+// Starting and Ending positions of the Vehicles - South
 pub const BOTTOM_SPAWN: (f32, f32) = (((CANVA_WIDTH / 2) + (VEHICLE_WIDTH / 2)) as f32, 1100.0);
 pub const BOTTOM_DESTINATION: (f32, f32) =
     (((CANVA_WIDTH / 2) + (VEHICLE_WIDTH / 2)) as f32, -100.0);
 
+// Starting and Ending positions of the Vehicles - North
 pub const UP_SPAWN: (f32, f32) = (((CANVA_WIDTH / 2) - (VEHICLE_WIDTH / 2)) as f32, -100.0);
 pub const UP_DESTINATION: (f32, f32) = (((CANVA_WIDTH / 2) - (VEHICLE_WIDTH / 2)) as f32, 1100.0);
 
+// Starting and Ending positions of the Vehicles - West
 pub const LEFT_SPAWN: (f32, f32) = (-100.0, ((CANVA_HEIGHT / 2) + (VEHICLE_HEIGHT / 2)) as f32);
 pub const LEFT_DESTINATION: (f32, f32) =
     (1100.0, ((CANVA_HEIGHT / 2) + (VEHICLE_HEIGHT / 2)) as f32);
 
+// Starting and Ending positions of the Vehicles - East
 pub const RIGHT_SPAWN: (f32, f32) = (1100.0, ((CANVA_HEIGHT / 2) - (VEHICLE_HEIGHT / 2)) as f32);
 pub const RIGHT_DESTINATION: (f32, f32) =
     (-100.0, ((CANVA_HEIGHT / 2) - (VEHICLE_HEIGHT / 2)) as f32);

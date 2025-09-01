@@ -3,8 +3,8 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 use crate::render::Renderer;
-use crate::simulation::TrafficLanes;
 
+// Function that will listen to user's inputs
 pub fn input_listener(event: Event, renderer: &mut Renderer) -> Result<(), String> {
     // Input listening
     match event {
@@ -12,39 +12,7 @@ pub fn input_listener(event: Event, renderer: &mut Renderer) -> Result<(), Strin
         | Event::KeyDown {
             keycode: Some(Keycode::Escape),
             ..
-        } => return Err("Program end".to_string()),
-
-        Event::KeyDown {
-            keycode: Some(Keycode::N),
-            ..
-        } => {
-            renderer.change_state("North");
-            Ok(())
-        }
-
-        Event::KeyDown {
-            keycode: Some(Keycode::W),
-            ..
-        } => {
-            renderer.change_state("West");
-            Ok(())
-        }
-
-        Event::KeyDown {
-            keycode: Some(Keycode::S),
-            ..
-        } => {
-            renderer.change_state("South");
-            Ok(())
-        }
-
-        Event::KeyDown {
-            keycode: Some(Keycode::E),
-            ..
-        } => {
-            renderer.change_state("East");
-            Ok(())
-        }
+        } => return Err("<---------- Program end ---------->".to_string()),
 
         // Listening for the DOWN keypress
         Event::KeyDown {
@@ -101,19 +69,19 @@ pub fn input_listener(event: Event, renderer: &mut Renderer) -> Result<(), Strin
 
             match rand_num {
                 0 => {
-                    // println!("Random generated Left Vehicle");
+                    println!("-> Random generated Left Vehicle");
                     renderer.lanes.spawn_vehicle("left");
                 }
                 1 => {
-                    // println!("Random generated Right Vehicle");
+                    println!("-> Random generated Right Vehicle");
                     renderer.lanes.spawn_vehicle("right");
                 }
                 2 => {
-                    // println!("Random generated Up Vehicle");
+                    println!("-> Random generated Up Vehicle");
                     renderer.lanes.spawn_vehicle("up");
                 }
                 _ => {
-                    // println!("Random generated Down Vehicle");
+                    println!("-> Random generated Down Vehicle");
                     renderer.lanes.spawn_vehicle("down");
                 }
             }
@@ -121,6 +89,41 @@ pub fn input_listener(event: Event, renderer: &mut Renderer) -> Result<(), Strin
             Ok(())
         }
 
+        // DEBUG INPUT - TRIGGERING TRAFFIC LIGHTS MANUALLY
+
+        // Event::KeyDown {
+        //     keycode: Some(Keycode::N),
+        //     ..
+        // } => {
+        //     renderer.change_state("North");
+        //     Ok(())
+        // }
+        //
+        // Event::KeyDown {
+        //     keycode: Some(Keycode::W),
+        //     ..
+        // } => {
+        //     renderer.change_state("West");
+        //     Ok(())
+        // }
+        //
+        // Event::KeyDown {
+        //     keycode: Some(Keycode::S),
+        //     ..
+        // } => {
+        //     renderer.change_state("South");
+        //     Ok(())
+        // }
+        //
+        // Event::KeyDown {
+        //     keycode: Some(Keycode::E),
+        //     ..
+        // } => {
+        //     renderer.change_state("East");
+        //     Ok(())
+        // }
+
+        // In case of no input from user, no error generated
         _ => Ok(()),
     }
 }
