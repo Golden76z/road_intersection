@@ -164,8 +164,6 @@ impl<'a> Vehicle {
                     && other.position.0 > self.position.0
             }
         }
-
-        self.render(canvas);
     }
 
     // Calculate distance to another vehicle
