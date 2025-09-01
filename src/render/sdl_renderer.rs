@@ -12,7 +12,8 @@ pub struct Renderer {
     pub lights: HashMap<String, TrafficLight>,
     pub lanes: TrafficLanes,
     pub waiting_lane: HashMap<String, HashMap<i32,Vehicle>>,
-    pub junction: HashSet<i32>
+    pub junction: HashSet<i32>,
+    pub active: String
 }
 
 impl Renderer {
@@ -65,12 +66,14 @@ impl Renderer {
             (String::from("West"),HashMap::new()),
         ]);
         let junction : HashSet<i32> = HashSet::new();
+        let active = String::new();
         Ok(Renderer {
             canvas,
             lights,
             lanes,
             waiting_lane,
-            junction
+            junction,
+            active
         })
     }
 
@@ -82,7 +85,14 @@ impl Renderer {
     }
 
     pub fn update_lights(&mut self) {
-        if !self.junction.is_empty() {
+        println!("{:?}",self.waiting_lane);
+        if !self.junction.is_empty() || !self.active.is_empty() {
+            if let Some(lane) = self.waiting_lane.get(&self.active) && lane.is_empty() {
+                if let Some(light) = self.lights.get_mut(&self.active) {
+                    light.change_state(Some(false));
+                    self.active.clear();
+                }
+            }
             return;
         }
         let mut max_lane: Option<&String> = None;
@@ -102,10 +112,14 @@ impl Renderer {
             if let Some(max_lane_name) = max_lane {
                 if lane_name == max_lane_name {
                     light.change_state(Some(true));
+                    self.active = lane_name.to_string();
                 } else {
                     light.change_state(Some(false));
                 }
             } else {
+                if self.active == lane_name.to_string() {
+                    self.active.clear()
+                }
                 light.change_state(Some(false));
             }
         }

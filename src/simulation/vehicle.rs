@@ -121,7 +121,7 @@ impl<'a> Vehicle {
     }
 
     // Check if there's a vehicle ahead within safe distance
-    pub fn is_vehicle_ahead(&self, vehicles: &VecDeque<Vehicle>) -> bool {
+    pub fn is_vehicle_ahead(&self, vehicles: &VecDeque<Vehicle>) -> Option<i32> {
         for other in vehicles.iter() {
             if other.id == self.id {
                 continue;
@@ -131,11 +131,11 @@ impl<'a> Vehicle {
             if self.is_vehicle_in_front(other) {
                 let distance = self.calculate_distance_to(other);
                 if distance < (SAFE_DISTANCE as f32 + VEHICLE_WIDTH as f32) {
-                    return true;
+                    return Some(other.id);
                 }
             }
         }
-        false
+        None
     }
 
     // Check if another vehicle is in front of this one
@@ -198,7 +198,10 @@ impl<'a> Vehicle {
         }
 
         // Check for vehicle ahead
-        if !should_stop && self.is_vehicle_ahead(vehicles) {
+        if !should_stop && let Some(vehicle_id) = self.is_vehicle_ahead(vehicles) {
+            if waiting.contains_key(&vehicle_id) {
+                waiting.insert(self.id,self.to_owned());
+            }
             should_stop = true;
         }
 
